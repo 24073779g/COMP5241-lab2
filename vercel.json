@@ -21,14 +21,14 @@
     }
   ],
   "env": {
-    "DATABASE_TYPE": "@database_type",
-    "DB_HOST": "@db_host",
-    "DB_NAME": "@db_name",
-    "DB_USER": "@db_user",
+    "DATABASE_TYPE": "postgresql",
+    "DB_HOST": "your-db-host.com",
+    "DB_NAME": "your-db-name",
+    "DB_USER": "your-db-user",
+    "DB_PORT": "5432",
+    "MONGODB_DB_NAME": "your-mongodb-name",
     "DB_PASSWORD": "@db_password",
-    "DB_PORT": "@db_port",
     "MONGODB_URI": "@mongodb_uri",
-    "MONGODB_DB_NAME": "@mongodb_db_name",
     "OPENAI_API_KEY": "@openai_api_key"
   }
 }
