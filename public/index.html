@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes App</title>
+    <!-- Same CSS as before -->
     <style>
+        /* Same styles as the original HTML file */
         * {
             margin: 0;
             padding: 0;
@@ -242,7 +244,8 @@
     <script>
         class NotesApp {
             constructor() {
-                this.apiUrl = 'http://localhost:5000/api';
+                // Use relative path for Vercel deployment
+                this.apiUrl = '/api';
                 this.notesContainer = document.getElementById('notesContainer');
                 this.noteForm = document.getElementById('noteForm');
                 this.messageDiv = document.getElementById('message');
@@ -316,7 +319,7 @@
                         <div class="note-content">${this.escapeHtml(note.content)}</div>
                         <div class="note-date">Created: ${new Date(note.created_at).toLocaleDateString()}</div>
                         <div class="note-actions">
-                            <button class="btn btn-delete" onclick="notesApp.deleteNote(${note.id})">
+                            <button class="btn btn-delete" onclick="notesApp.deleteNote('${note.id}')">
                                 🗑️ Delete
                             </button>
                         </div>
