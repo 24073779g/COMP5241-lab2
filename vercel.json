@@ -27,8 +27,7 @@
     "DB_USER": "your-db-user",
     "DB_PORT": "5432",
     "MONGODB_DB_NAME": "your-mongodb-name",
-    "DB_PASSWORD": "@db_password",
-    "MONGODB_URI": "@mongodb_uri",
-    "OPENAI_API_KEY": "@openai_api_key"
+    "DB_PASSWORD": "your-password",
+    "MONGODB_URI": "=mongodb+srv://username:password@cluster.mongodb.net/"
   }
 }
