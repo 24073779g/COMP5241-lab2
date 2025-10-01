@@ -26,4 +26,8 @@ with app.app_context():
 def serve_index():
     return send_from_directory('../public/pages', 'index.html')
 
+@app.route('/debug')
+def debug():
+    return "Python application is working!", 200
+    
 application = app
