@@ -5,12 +5,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from db.user import db
-from db.note import Note
 from routes.user import user_bp
 from routes.note import note_bp
 from dotenv import load_dotenv
 
-app = Flask(__name__, pages_folder=os.path.join(os.path.dirname(__file__), 'pages'))
+app = Flask(__name__, static_folder='pages')
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
 CORS(app)
@@ -54,8 +53,7 @@ def home():
     return 'Welcome to Vercel!'
 
 # Vercel serverless function handler
-def handler(environ, start_response):
-    return app(environ, start_response)
+application = app
 
 # Export for Vercel
 if __name__ == '__main__':
