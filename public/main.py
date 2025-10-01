@@ -5,6 +5,7 @@ from db.user import db
 from routes.user import user_bp
 from routes.note import note_bp
 from dotenv import load_dotenv
+from flask import send_from_directory
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
@@ -21,6 +22,15 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+
+# Add this route handler
+@app.route('/')
+def serve_index():
+    return send_from_directory('pages', 'index.html')
+
+# Keep this for Vercel
+application = app
 
 # Vercel serverless function handler
 application = app
