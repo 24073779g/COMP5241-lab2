@@ -1,18 +1,43 @@
-from flask_sqlalchemy import SQLAlchemy
+from flask import Blueprint, jsonify, request
+from db.user import User, db
 
-db = SQLAlchemy()
+user_bp = Blueprint('user', __name__)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(80), unique=True, nullable=False)
 
-    def __repr__(self):
-        return f'<User {self.username}>'
+@user_bp.route('/users', methods=['GET'])
+def get_all_users():
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users])
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email
-        }
+@user_bp.route('/users/<int:id>', methods=['GET'])
+def get_user_by_id(id):
+    user = User.query.get_or_404(id)
+    return jsonify(user.to_dict())
+
+@user_bp.route('/users/create', methods=['POST'])
+def create_user():
+    data = request.json
+    user = User(username=data['username'], email=data['email'])
+
+    db.session.add(User(username=username, email=email))
+    db.session.commit()
+
+    return jsonify(user.to_dict()), 201
+
+@user_bp.route('/users/<int:id>', methods=['PUT'])
+def update_user(id):
+    user = User.query.get_or_404(user_id)
+    data = request.json
+    
+    user.username = data.get('username', user.username)
+    user.email = data.get('email', user.email)
+
+    db.session.commit()
+    return jsonify(user.to_dict())
+
+@user_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return '', 204

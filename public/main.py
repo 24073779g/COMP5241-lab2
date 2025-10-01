@@ -4,10 +4,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from src.models.user import db
-from src.routes.user import user_bp
-from src.routes.note import note_bp
-from src.models.note import Note
+from db.user import db
+from routes.user import user_bp
+from routes.note import note_bp
+from db.note import Note
 from dotenv import load_dotenv
 
 app = Flask(__name__, pages_folder=os.path.join(os.path.dirname(__file__), 'pages'))
