@@ -1,9 +1,9 @@
 import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from public.db.user import db
-from public.routes.user import user_bp
-from public.routes.note import note_bp
+from src.db.user import db
+from src.routes.user import user_bp
+from src.routes.note import note_bp
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -29,5 +29,5 @@ def serve_index():
 @app.route('/debug')
 def debug():
     return "Python application is working!", 200
-    
+
 application = app

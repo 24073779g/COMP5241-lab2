@@ -1,8 +1,7 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "api/index.py",
+      "src": "src/main.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
@@ -11,18 +10,18 @@
       }
     },
     {
-      "src": "public/pages/**",
+      "src": "src/pages/**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "dest": "src/main"
     },
     {
       "src": "/(.*)",
-      "dest": "public/pages/index.html"
+      "dest": "src/pages/index.html"
     }
   ]
 }
