@@ -2,22 +2,27 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/main.py",
+      "src": "api/index.py",
       "use": "@vercel/python",
       "config": { 
         "maxLambdaSize": "15mb",
-        "runtime": "python3.11"
+        "runtime": "python3.11",
+        "installCommand": "bash vercel-build.sh"
       }
+    },
+    {
+      "src": "public/pages/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/public/main"
+      "dest": "api/index.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/pages/index.html"
+      "dest": "public/pages/index.html"
     }
   ]
 }
