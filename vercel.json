@@ -13,11 +13,16 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/main.py"
+      "dest": "/public/main.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/pages/index.html"
+      "dest": "/public/pages/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "public/main.py": {
+      "maxDuration": 30
+    }
+  }
 }

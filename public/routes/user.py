@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.models.user import User, db
+from db.user import User, db
 
 user_bp = Blueprint('user', __name__)
 
@@ -19,14 +19,14 @@ def create_user():
     data = request.json
     user = User(username=data['username'], email=data['email'])
 
-    db.session.add(User(username=username, email=email))
+    db.session.add(user)
     db.session.commit()
 
     return jsonify(user.to_dict()), 201
 
 @user_bp.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(id)
     data = request.json
     
     user.username = data.get('username', user.username)

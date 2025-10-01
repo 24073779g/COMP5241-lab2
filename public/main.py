@@ -7,7 +7,6 @@ from flask_cors import CORS
 from db.user import db
 from routes.user import user_bp
 from routes.note import note_bp
-from db.note import Note
 from dotenv import load_dotenv
 
 app = Flask(__name__, pages_folder=os.path.join(os.path.dirname(__file__), 'pages'))
@@ -53,9 +52,11 @@ def serve(path):
 def home():
     return 'Welcome to Vercel!'
 
+# Vercel serverless function handler
 def handler(environ, start_response):
     return app(environ, start_response)
 
+# Export for Vercel
 if __name__ == '__main__':
     with app.app_context():
         from sqlalchemy import inspect, text
