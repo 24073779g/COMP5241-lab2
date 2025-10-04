@@ -24,10 +24,22 @@ with app.app_context():
 
 @app.route('/')
 def serve_index():
-    return send_from_directory('../public/pages', 'index.html')
+    return send_from_directory('../src/pages', 'index.html')
 
 @app.route('/debug')
 def debug():
     return "Python application is working!", 200
+
+@app.route('/debug/routes')
+def debug_routes():
+    """Debug endpoint to show all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'rule': str(rule)
+        })
+    return jsonify(routes)
 
 application = app
