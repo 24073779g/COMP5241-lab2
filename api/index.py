@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from flask_cors import CORS
 from src.db.user import db
 from src.routes.user import user_bp
@@ -15,7 +15,13 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(note_bp, url_prefix='/api')
 
 load_dotenv()
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+# Set a default SQLite database if DATABASE_URL is not provided
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    # Use SQLite as fallback for local development
+    database_url = "sqlite:///notes.db"
+    
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
