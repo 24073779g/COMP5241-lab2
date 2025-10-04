@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.models.note import Note, db
+from src.db.note import Note, db
 from datetime import datetime, date, time
 
 note_bp = Blueprint('note', __name__)
