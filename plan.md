@@ -1,45 +1,36 @@
-# Migration Plan: SQLite to Supabase
+# Migration Plan for Note Taking App
 
-## Step 1: Setup and Configuration
-1. Create a Supabase account and project
-2. Get the Supabase connection credentials
-3. Install required dependencies (supabase-js)
-4. Configure environment variables
+## Step 1: Setup Supabase Integration
+
+1. Create a new Supabase project at https://supabase.com
+2. Set up the database schema using the schema.sql file
+3. Create .env file with Supabase credentials
+4. Add python-dotenv and supabase packages to requirements.txt
 
 ## Step 2: Database Migration
-1. Create equivalent tables in Supabase
-2. Modify database access code to use Supabase client
-3. Update all CRUD operations to use Supabase queries
-4. Test data persistence with Supabase
 
-## Step 3: Vercel Deployment Preparation
-1. Add Vercel configuration files
-2. Configure environment variables in Vercel
-3. Test build process locally
-4. Deploy to Vercel
+1. Create a new supabase_client.py for database connection
+2. Update Note model to work with Supabase
+3. Remove SQLAlchemy dependencies
+4. Create migration script to move data from SQLite to Supabase (if needed)
 
-## Implementation Details
+## Step 3: Update API Routes
 
-### Supabase Setup
-1. Sign up at supabase.com
-2. Create new project
-3. Get connection string and API keys
-4. Create notes table with similar structure to current SQLite schema
+1. Refactor note routes to use Supabase client
+2. Update CRUD operations to use Supabase methods
+3. Update search functionality to use Supabase text search
+4. Remove SQLAlchemy session management
 
-### Code Changes
-1. Install dependencies:
-   ```bash
-   npm install @supabase/supabase-js
-   ```
+## Step 4: Vercel Deployment Setup
 
-2. Create Supabase client configuration
-3. Replace SQLite queries with Supabase equivalent
-4. Update environment variables
+1. Create vercel.json configuration file
+2. Update main.py for serverless deployment
+3. Configure environment variables in Vercel
+4. Test deployment locally using vercel dev
 
-### Vercel Setup
-1. Configure environment variables:
-   - SUPABASE_URL
-   - SUPABASE_KEY
-   - LLM_API_KEY
-2. Add vercel.json if needed
-3. Test deployment
+## Step 5: Testing and Validation
+
+1. Test all API endpoints with new Supabase backend
+2. Verify data persistence
+3. Test search functionality
+4. Validate environment variable configuration
