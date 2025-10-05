@@ -12,12 +12,17 @@ This document summarizes the work done to refactor the note-taking app for a clo
 - Frontend: updated `src/static/index.html` to show and edit event date/time, add Translate UI, and a Generate Notes button.
 - Backend routes and models updated in `src/routes` and `src/models` to support new features.
 
+- Fixed import and dependency issues that prevented the app from starting on Vercel (see "Deployment troubleshooting" below).
+- Integrated a Quill rich-text editor in the frontend so note content is stored/edited as HTML. See frontend notes below for XSS and image-upload considerations.
+
 Key edited/added files
 - `supabase/schema.sql` — DB schema + ALTER statements to add `event_date` and `event_time`.
 - `src/models/note.py` — Note model now includes `event_date` and `event_time`.
 - `src/routes/note.py` — Notes endpoints: create, update, list, single note, and new `POST /api/notes/generate` endpoint. Also improved tag handling.
 - `src/routes/translate.py` — New translation endpoints and multi-backend support (LibreTranslate + GitHub Models).
 - `src/static/index.html` — UI changes: date/time inputs, Translate panel, Generate Notes button, JS handlers.
+- `src/lib/supabase_client.py` — now initializes Supabase safely: it no longer raises at import time when environment variables are missing (provides a runtime error when used). This prevents Vercel function import-time crashes.
+- `requirements.txt` — added `Flask-SQLAlchemy` so the runtime has the required package on Vercel.
 
 ## How to run locally (quick)
 1. Install dependencies (make sure the active environment is correct):
@@ -25,6 +30,8 @@ Key edited/added files
 ```powershell
 pip install -r requirements.txt
 ```
+
+Note: `Flask-SQLAlchemy` was added to `requirements.txt` to ensure SQLAlchemy integration is available on remote deployments (Vercel installs from this file).
 
 2. Configure environment variables (create a `.env` file in the project root or export in your shell):
 
@@ -34,6 +41,8 @@ pip install -r requirements.txt
 - (Optional) `TRANSLATE_URL` — base URL for a LibreTranslate-compatible instance (default: https://libretranslate.de)
 - (Optional) `TRANSLATE_API_KEY` — API key for LibreTranslate if your instance requires one
 - (Optional) `USE_GITHUB_MODELS=true` to force using the GitHub Models inference endpoint
+
+Important: if you use a `.env` file locally, do not assume Vercel will read it — Vercel requires environment variables to be configured in the Project Settings (see deployment notes below).
 
 3. Apply the DB schema changes to your Supabase project. The `supabase/schema.sql` file contains the CREATE/ALTER statements. You can run those SQL statements in the Supabase SQL editor or via psql connected to the DB.
 
@@ -82,11 +91,15 @@ curl.exe -X POST http://127.0.0.1:5001/api/notes/<note_id>/translate -H "Content
 
 5. Server auto-reloader made debugging logs noisy (server restarted while testing). I turned off the reloader locally during debugging so logs stayed stable.
 
+6. Deployment missing dependencies and env-vars on Vercel: during deployment the function crashed with import-time errors. See the "Deployment troubleshooting" section below for details and the fixes applied.
+
 ## Lessons learnt
 - Always add small, descriptive debug logs at integration boundaries (DB query, API responses, and critical parsing points). They quickly highlight which layer lost data.
 - Use defensive parsing and graceful fallbacks when integrating with external services that can return multiple shapes.
 - Prefer feature toggles (env vars) for optional backends rather than hard-coding them. This helps when switching between a free public service and a paid/prod instance.
 - For front-end quick features, prompt-based interactions are fast to implement; for production UX, replace them with modals or fully designed forms.
+
+Also: always confirm `requirements.txt` includes all runtime dependencies that your code imports at top-level — serverless platforms install from that file only.
 
 ## What I would improve next
 - Add formal migrations (e.g., use a migration tool) rather than ad-hoc ALTER SQL in `schema.sql`.
@@ -94,6 +107,8 @@ curl.exe -X POST http://127.0.0.1:5001/api/notes/<note_id>/translate -H "Content
 - Replace prompt() based generate flow with a modal UI and add options to control event_date/time per generated note.
 - Add an option to save translated text back to notes (e.g., create a parallel `translated_content` field or language-tagged versions of notes).
 - Add server-side validation for `event_date`/`event_time` formats and better error code handling.
+
+- Add server-side HTML sanitization and an image-upload handler for Quill (uploads can go to Supabase Storage and return a safe URL to embed).
 
 ## Files changed (quick map)
 - DB: `supabase/schema.sql`
@@ -106,6 +121,29 @@ curl.exe -X POST http://127.0.0.1:5001/api/notes/<note_id>/translate -H "Content
 - [ ] DB: Run SQL in `supabase/schema.sql` (or use Supabase SQL editor) to ensure `event_date` and `event_time` exist.
 - [ ] Env vars: Set SUPABASE_URL and SUPABASE_ANON_KEY.
 - [ ] Start server and test: create note with date/time; list and edit note; translation; generate notes.
+
+Deployment troubleshooting (what happened & how it was fixed)
+
+- Symptom: Vercel deployments returned "500: INTERNAL_SERVER_ERROR / FUNCTION_INVOCATION_FAILED". Logs showed an exception during import of `src/models/user.py`:
+
+  ModuleNotFoundError: No module named 'flask_sqlalchemy'
+
+  This prevented the serverless function from initializing because top-level imports raised during the function cold start.
+
+- Fixes applied in this repo:
+  - Added `Flask-SQLAlchemy` to `requirements.txt` so Vercel installs the package during build.
+  - Reworked `src/lib/supabase_client.py` to avoid raising at import time when `SUPABASE_URL`/`SUPABASE_ANON_KEY` are missing. Instead it provides a small runtime fallback that raises a clear RuntimeError only when Supabase is actually used. This prevents import-time crashes on Vercel when env vars are not yet configured.
+
+- What you must do in Vercel after these changes:
+  1. In Vercel dashboard → Project Settings → Environment Variables, add these keys (Production scope):
+     - SUPABASE_URL (value copied from your `.env`)
+     - SUPABASE_ANON_KEY (value copied from your `.env`)
+     - SECRET_KEY (optional, used by Flask sessions)
+  2. Redeploy the project (trigger a new deployment or push a commit). Check the deployment logs for any remaining errors.
+
+- Notes about `.env` formatting: avoid spaces around `=` in key=value lines (for example `GITHUB_TOKEN = ...` may create a key with trailing space). Vercel environment variables are set in the dashboard and should not include extra spaces in the key name.
+
+If after redeploying you still see a crash, copy the latest error logs and paste them here — I'll debug the next cause quickly.
 
 ## Closing notes
 If you want, I can now:

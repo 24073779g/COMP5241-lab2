@@ -596,6 +596,9 @@
             background: #5a6fd8;
         }
     </style>
+    <!-- Quill rich text editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -646,8 +649,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="noteContent">Content</label>
-                        <textarea class="form-textarea" id="noteContent" placeholder="Start writing your note..."></textarea>
+                        <label class="form-label" for="quillEditor">Content</label>
+                        <!-- Quill editor will be mounted into this container -->
+                        <div id="quillEditor" class="form-textarea" style="min-height:300px;"></div>
                     </div>
 
                     <div class="form-group">
@@ -732,6 +736,26 @@
                     this.loadNotes(),
                     this.loadTags()
                 ]);
+
+                // Initialize Quill rich text editor
+                try {
+                    this.quill = new Quill('#quillEditor', {
+                        theme: 'snow',
+                        placeholder: 'Start writing your note...',
+                        modules: {
+                            toolbar: [
+                                [{ header: [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Quill failed to initialize, falling back to textarea.', e);
+                    this.quill = null;
+                }
             }
 
             async loadTags() {
@@ -1036,7 +1060,7 @@
                     }
                 });
                 
-                // Auto-save on content change (debounced)
+                // Auto-save on content change (debounced). Use Quill events if available, otherwise textarea.
                 let saveTimeout;
                 const autoSave = () => {
                     clearTimeout(saveTimeout);
@@ -1046,9 +1070,14 @@
                         }
                     }, 2000);
                 };
-                
+
                 document.getElementById('noteTitle').addEventListener('input', autoSave);
-                document.getElementById('noteContent').addEventListener('input', autoSave);
+                if (this.quill) {
+                    this.quill.on('text-change', autoSave);
+                } else {
+                    const contentEl = document.getElementById('noteContent');
+                    if (contentEl) contentEl.addEventListener('input', autoSave);
+                }
 
                 // Translation UI bindings
                 const translateBtn = document.getElementById('translateBtn');
@@ -1183,9 +1212,16 @@
                     const contentInput = document.getElementById('noteContent');
                     const editorTitle = document.getElementById('editorTitle');
                     
-                    if (titleInput && contentInput && editorTitle) {
+                    if (titleInput && editorTitle) {
                         titleInput.value = note.title || '';
-                        contentInput.value = note.content || '';
+                        // Set content into Quill as HTML if available, otherwise set textarea value
+                        if (this.quill) {
+                            const html = note.content || '';
+                            // If content looks like plain text, Quill will accept it too
+                            this.quill.root.innerHTML = html;
+                        } else if (contentInput) {
+                            contentInput.value = note.content || '';
+                        }
                         // Populate event date/time inputs if present
                         const eventDateInput = document.getElementById('eventDate');
                         const eventTimeInput = document.getElementById('eventTime');
@@ -1271,7 +1307,16 @@
                 if (!this.currentNote) return;
 
                 const title = document.getElementById('noteTitle').value.trim();
-                const content = document.getElementById('noteContent').value.trim();
+                // Get content from Quill as HTML; fallback to textarea if not available
+                let content = '';
+                if (this.quill) {
+                    content = this.quill.root.innerHTML.trim();
+                    // If the editor is empty Quill may produce '<p><br></p>' — normalize to empty string
+                    if (content === '<p><br></p>') content = '';
+                } else {
+                    const el = document.getElementById('noteContent');
+                    content = el ? el.value.trim() : '';
+                }
 
                 if (!title && !content) {
                     if (!isAutoSave) {
@@ -1320,6 +1365,14 @@
                     
                     this.renderNotesList();
                     document.getElementById('editorTitle').textContent = savedNote.title;
+
+                    // If Quill is available, ensure editor shows saved HTML content
+                    if (this.quill) {
+                        this.quill.root.innerHTML = savedNote.content || '';
+                    } else {
+                        const contentEl = document.getElementById('noteContent');
+                        if (contentEl) contentEl.value = savedNote.content || '';
+                    }
                     
                     if (!isAutoSave) {
                         this.showMessage('Note saved successfully!', 'success');
