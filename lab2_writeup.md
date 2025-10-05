@@ -148,11 +148,3 @@ Deployment troubleshooting (what happened & how it was fixed)
 - Notes about `.env` formatting: avoid spaces around `=` in key=value lines (for example `GITHUB_TOKEN = ...` may create a key with trailing space). Vercel environment variables are set in the dashboard and should not include extra spaces in the key name.
 
 If after redeploying you still see a crash, copy the latest error logs and paste them here — I'll debug the next cause quickly.
-
-## Closing notes
-If you want, I can now:
-- Add a small modal UI for generating notes and allow adding event_date/time from the modal.
-- Implement saving translations back to notes and optionally detect language automatically.
-- Create migration scripts and add a tiny test suite for the main endpoints.
-
-If you want screenshots or a PR-ready commit history/log, tell me which parts you'd like documented or committed, and I will prepare them and/or create the PR.
