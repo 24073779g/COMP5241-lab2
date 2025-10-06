@@ -4,7 +4,7 @@ This document summarizes the work done to refactor the note-taking app for a clo
 
 ## 🚀 Live Demo
 Repo: https://github.com/COMP5241-2526Sem1/note-taking-app-updated-24073779g/blob/main/lab2_writeup.md
-The application is deployed and accessible at: **https://24073779g-comp5241-lab2-45tg1q21y-24073779gs-projects.vercel.app**
+The application is deployed and accessible at: *https://24073779g-comp5241-lab2.vercel.app*
 
 ## Summary of changes
 - Migrated data model to use an external Postgres-compatible DB (Supabase). The schema changes are in `supabase/schema.sql`.
